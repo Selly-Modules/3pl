@@ -4,14 +4,23 @@ import "github.com/Selly-Modules/tpl/util/pjson"
 
 // NatsResponse ...
 type NatsResponse struct {
-	Data      interface{} `json:"data"`
-	Error     bool        `json:"error"`
-	Message   string      `json:"message"`
-	RequestID string      `json:"requestId"`
+	Response  *HttpResponse `json:"response"`
+	Error     bool          `json:"error"`
+	Message   string        `json:"message"`
+	RequestID string        `json:"requestId"`
 }
 
-// ParseData ...
-func (r *NatsResponse) ParseData(result interface{}) error {
-	b := pjson.ToBytes(r.Data)
+// ParseResponseData ...
+func (r *NatsResponse) ParseResponseData(result interface{}) error {
+	if r.Response == nil {
+		return nil
+	}
+	b := pjson.ToBytes(r.Response.Body)
 	return pjson.Unmarshal(b, result)
+}
+
+// HttpResponse ...
+type HttpResponse struct {
+	Body       string `json:"body"`
+	StatusCode int    `json:"statusCode"`
 }

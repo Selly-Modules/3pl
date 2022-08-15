@@ -85,7 +85,7 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return nil, err
 	}
-	err = r.ParseData(&res)
+	err = r.ParseResponseData(&res)
 	return &res, err
 }
 
@@ -114,7 +114,7 @@ func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return nil, err
 	}
-	err = r.ParseData(&res)
+	err = r.ParseResponseData(&res)
 	return &res, err
 }
 
