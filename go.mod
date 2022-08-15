@@ -1,4 +1,4 @@
-module github.com/Selly-Modules/tpl
+module github.com/Selly-Modules/3pl
 
 go 1.17
 
