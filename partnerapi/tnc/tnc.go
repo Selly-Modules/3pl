@@ -8,11 +8,11 @@ import (
 
 	"github.com/Selly-Modules/logger"
 	"github.com/Selly-Modules/natsio"
+	"github.com/Selly-Modules/natsio/model"
 	"github.com/nats-io/nats.go"
 
-	"github.com/Selly-Modules/tpl/constant"
-	natsiomodel "github.com/Selly-Modules/tpl/model/natsio"
-	"github.com/Selly-Modules/tpl/util/pjson"
+	"github.com/Selly-Modules/3pl/constant"
+	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
 // Client ...
@@ -47,11 +47,11 @@ func NewClient(env ENV, clientID, clientSecret, realm string, natsClient natsio.
 // CreateOutboundRequest ...
 func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundRequestRes, error) {
 	apiURL := c.getBaseURL() + apiPathCreateOutboundRequest
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    apiURL,
-			Method: http.MethodGet,
+			Method: http.MethodPost,
 			Data:   pjson.ToJSONString(p),
 			Header: c.getRequestHeader(),
 		},
@@ -65,7 +65,7 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 		return nil, err
 	}
 	var (
-		r       natsiomodel.NatsResponse
+		r       model.CommunicationHttpResponse
 		errRes  ErrRes
 		dataRes []OutboundRequestRes
 	)
@@ -88,16 +88,60 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 	if len(dataRes) == 0 {
 		return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: empty_result")
 	}
+	item := &dataRes[0]
+	e := item.Error
+	if e != nil {
+		return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: failed, code %s - message %s", e.Code, e.ErrorMessage)
+	}
 
-	return &dataRes[0], err
+	return item, err
+}
+
+// UpdateOutboundRequestLogisticInfo ...
+func (c *Client) UpdateOutboundRequestLogisticInfo(p UpdateORLogisticInfoPayload) error {
+	apiURL := c.getBaseURL() + fmt.Sprintf(apiPathUpdateLogisticInfoOutboundRequest, p.OrID)
+	natsPayload := model.CommunicationRequestHttp{
+		ResponseImmediately: true,
+		Payload: model.HttpRequest{
+			URL:    apiURL,
+			Method: http.MethodPost,
+			Header: c.getRequestHeader(),
+		},
+	}
+	msg, err := c.requestHttpViaNats(natsPayload)
+	if err != nil {
+		logger.Error("tnc.Client.UpdateOutboundRequestLogisticInfo - requestHttpViaNats", logger.LogData{
+			"err":     err.Error(),
+			"payload": natsPayload,
+		})
+		return err
+	}
+	var (
+		r      model.CommunicationHttpResponse
+		errRes ErrRes
+	)
+	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
+		return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: parse_data %v", err)
+	}
+	res := r.Response
+	if res == nil {
+		return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: empty_response")
+	}
+	if res.StatusCode >= http.StatusBadRequest {
+		if err = r.ParseResponseData(&errRes); err != nil {
+			return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: parse_response_err: %v", err)
+		}
+		return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+	}
+	return nil
 }
 
 // GetOutboundRequestByID ...
 func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, error) {
 	apiURL := c.getBaseURL() + fmt.Sprintf(apiPathGetOutboundRequest, requestID)
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    apiURL,
 			Method: http.MethodGet,
 			Header: c.getRequestHeader(),
@@ -112,7 +156,7 @@ func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, er
 		return nil, err
 	}
 	var (
-		r               natsiomodel.NatsResponse
+		r               model.CommunicationHttpResponse
 		errRes          ErrRes
 		outboundRequest OutboundRequestInfo
 	)
@@ -136,14 +180,16 @@ func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, er
 }
 
 // CancelOutboundRequest ...
-func (c *Client) CancelOutboundRequest(requestID int) error {
+func (c *Client) CancelOutboundRequest(requestID int, note string) error {
 	apiURL := c.getBaseURL() + fmt.Sprintf(apiPathCancelOutboundRequest, requestID)
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	data := map[string]string{"note": note}
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    apiURL,
 			Method: http.MethodPost,
 			Header: c.getRequestHeader(),
+			Data:   pjson.ToJSONString(data),
 		},
 	}
 	msg, err := c.requestHttpViaNats(natsPayload)
@@ -155,7 +201,7 @@ func (c *Client) CancelOutboundRequest(requestID int) error {
 		return err
 	}
 	var (
-		r      natsiomodel.NatsResponse
+		r      model.CommunicationHttpResponse
 		errRes ErrRes
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
@@ -186,9 +232,9 @@ func (c *Client) auth() (*authRes, error) {
 		"Content-Type": "application/x-www-form-urlencoded",
 	}
 	apiURL := baseURLAuthENVMapping[c.env] + fmt.Sprintf(apiPathAuth, c.realm)
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    apiURL,
 			Method: http.MethodPost,
 			Data:   body,
@@ -204,7 +250,7 @@ func (c *Client) auth() (*authRes, error) {
 		return nil, err
 	}
 	var (
-		r      natsiomodel.NatsResponse
+		r      model.CommunicationHttpResponse
 		errRes ErrRes
 		data   authRes
 	)
@@ -240,7 +286,7 @@ func (c *Client) getRequestHeader() map[string]string {
 	return m
 }
 
-func (c *Client) requestHttpViaNats(data natsiomodel.NatsRequestHTTP) (*nats.Msg, error) {
+func (c *Client) requestHttpViaNats(data model.CommunicationRequestHttp) (*nats.Msg, error) {
 	s := constant.NatsCommunicationSubjectRequestHTTP
 	b := pjson.ToBytes(data)
 	return c.natsClient.Request(s, b)

@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/Selly-Modules/logger v0.0.1
-	github.com/Selly-Modules/natsio v1.0.0
+	github.com/Selly-Modules/natsio v1.0.1-0.20220818104747-572120c26a1d
 )
 
 require (

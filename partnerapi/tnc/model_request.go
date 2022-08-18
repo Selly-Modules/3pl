@@ -42,3 +42,11 @@ type OutboundRequestPayload struct {
 	TPLCode             string    `json:"tplCode"`
 	TrackingCode        string    `json:"trackingCode"`
 }
+
+// UpdateORLogisticInfoPayload ...
+type UpdateORLogisticInfoPayload struct {
+	OrID          int    `json:"orId"`
+	TrackingCode  string `json:"trackingCode"`
+	ShippingLabel string `json:"shippingLabel"`
+	SlaShipDate   string `json:"slaShipDate"`
+}

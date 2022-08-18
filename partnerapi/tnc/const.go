@@ -3,10 +3,11 @@ package tnc
 const (
 	TimeLayout = "2006-01-02 15:04:05"
 
-	apiPathCreateOutboundRequest = "/api/v1/ors"
-	apiPathGetOutboundRequest    = "/api/v1/ors/%d"
-	apiPathCancelOutboundRequest = "/api/v1/ors/%d/cancel"
-	apiPathAuth                  = "/auth/realms/%s/protocol/openid-connect/token"
+	apiPathCreateOutboundRequest             = "/api/v1/ors"
+	apiPathGetOutboundRequest                = "/api/v1/ors/%d"
+	apiPathCancelOutboundRequest             = "/api/v1/ors/%d/cancel"
+	apiPathUpdateLogisticInfoOutboundRequest = "/api/v1/ors/%d/logistic-info"
+	apiPathAuth                              = "/auth/realms/%s/protocol/openid-connect/token"
 
 	PriorityUrgent = 3
 	PriorityHigh   = 2
@@ -19,6 +20,13 @@ const (
 	TPLCodeViettelPost  = "VTP"
 	TPLCodeSellyExpress = "SE"
 	TPLCodeJTExpress    = "JTE"
+
+	ShippingServiceCodeSTD = "STD"
+	ORTypeOrder            = 1
+	ShippingTypeSelfShip   = 1
+	PackTypeNormal         = 1
+	BizTypeB2C             = 1
+	ConditionTypeCodeNew   = "NEW"
 )
 
 const (

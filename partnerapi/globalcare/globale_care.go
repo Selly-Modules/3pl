@@ -7,13 +7,13 @@ import (
 
 	"github.com/Selly-Modules/logger"
 	"github.com/Selly-Modules/natsio"
+	"github.com/Selly-Modules/natsio/model"
 	"github.com/nats-io/nats.go"
 	"github.com/thoas/go-funk"
 
-	"github.com/Selly-Modules/tpl/constant"
-	natsiomodel "github.com/Selly-Modules/tpl/model/natsio"
-	"github.com/Selly-Modules/tpl/util/base64"
-	"github.com/Selly-Modules/tpl/util/pjson"
+	"github.com/Selly-Modules/3pl/constant"
+	"github.com/Selly-Modules/3pl/util/base64"
+	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
 // Client ...
@@ -62,9 +62,9 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 		Signature: "", // TODO:implement
 		Data:      base64.Encode(pjson.ToBytes(data)),
 	}
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    url,
 			Method: http.MethodPost,
 			Data:   pjson.ToJSONString(body),
@@ -79,7 +79,7 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 		return nil, err
 	}
 	var (
-		r   natsiomodel.NatsResponse
+		r   model.CommunicationHttpResponse
 		res CommonResponse
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
@@ -92,9 +92,9 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 // GetOrder ...
 func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 	url := c.getBaseURL() + fmt.Sprintf(apiPathGetOrder, orderCode)
-	natsPayload := natsiomodel.NatsRequestHTTP{
+	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
-		Payload: natsiomodel.HTTPPayload{
+		Payload: model.HttpRequest{
 			URL:    url,
 			Method: http.MethodGet,
 		},
@@ -108,7 +108,7 @@ func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 		return nil, err
 	}
 	var (
-		r   natsiomodel.NatsResponse
+		r   model.CommunicationHttpResponse
 		res CommonResponse
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
