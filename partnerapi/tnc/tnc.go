@@ -52,7 +52,7 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 		Payload: model.HttpRequest{
 			URL:    apiURL,
 			Method: http.MethodPost,
-			Data:   pjson.ToJSONString(p),
+			Data:   pjson.ToJSONString([]OutboundRequestPayload{p}),
 			Header: c.getRequestHeader(),
 		},
 	}
@@ -173,7 +173,7 @@ func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, er
 		}
 		return nil, fmt.Errorf("tnc.Client.GetOutboundRequestByID: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
 	}
-	if err = r.ParseResponseData(outboundRequest); err != nil {
+	if err = r.ParseResponseData(&outboundRequest); err != nil {
 		return nil, fmt.Errorf("tnc.Client.GetOutboundRequestByID: parse_response_data: %v", err)
 	}
 	return &outboundRequest, nil
@@ -267,7 +267,7 @@ func (c *Client) auth() (*authRes, error) {
 		}
 		return nil, fmt.Errorf("tnc.Client.auth: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
 	}
-	if err = r.ParseResponseData(data); err != nil {
+	if err = r.ParseResponseData(&data); err != nil {
 		return nil, fmt.Errorf("tnc.Client.auth: parse_response_data: %v", err)
 	}
 	return &data, nil
