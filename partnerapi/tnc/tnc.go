@@ -106,6 +106,7 @@ func (c *Client) UpdateOutboundRequestLogisticInfo(p UpdateORLogisticInfoPayload
 			URL:    apiURL,
 			Method: http.MethodPost,
 			Header: c.getRequestHeader(),
+			Data:   pjson.ToJSONString(p),
 		},
 	}
 	msg, err := c.requestHttpViaNats(natsPayload)
