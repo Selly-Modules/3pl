@@ -37,6 +37,10 @@ const (
 	baseURLProd     = "https://ext-api.tnclog.vn"
 )
 
+const (
+	ErrCodeExistPartnerCode = "exist_partner_code"
+)
+
 var (
 	baseURLENVMapping = map[ENV]string{
 		EnvProd:    baseURLProd,
