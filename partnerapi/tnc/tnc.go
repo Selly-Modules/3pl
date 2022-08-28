@@ -9,9 +9,9 @@ import (
 	"github.com/Selly-Modules/logger"
 	"github.com/Selly-Modules/natsio"
 	"github.com/Selly-Modules/natsio/model"
+	"github.com/Selly-Modules/natsio/subject"
 	"github.com/nats-io/nats.go"
 
-	"github.com/Selly-Modules/3pl/constant"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
@@ -288,9 +288,8 @@ func (c *Client) getRequestHeader() map[string]string {
 }
 
 func (c *Client) requestHttpViaNats(data model.CommunicationRequestHttp) (*nats.Msg, error) {
-	s := constant.NatsCommunicationSubjectRequestHTTP
 	b := pjson.ToBytes(data)
-	return c.natsClient.Request(s, b)
+	return c.natsClient.Request(subject.Communication.RequestHTTP, b)
 }
 
 func (c *Client) getBaseURL() string {
