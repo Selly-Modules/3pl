@@ -1,17 +1,21 @@
 package globalcare
 
 import (
+	"crypto"
+	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/Selly-Modules/logger"
 	"github.com/Selly-Modules/natsio"
 	"github.com/Selly-Modules/natsio/model"
+	"github.com/Selly-Modules/natsio/subject"
 	"github.com/nats-io/nats.go"
 	"github.com/thoas/go-funk"
 
-	"github.com/Selly-Modules/3pl/constant"
 	"github.com/Selly-Modules/3pl/util/base64"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
@@ -27,7 +31,7 @@ type Client struct {
 // NewClient generate Client
 // using privateKey to decrypt data from Global Care
 // using publicKey to encrypt data before send to Global Care
-func NewClient(env ENV, privateKey, publicKey string) (*Client, error) {
+func NewClient(env ENV, privateKey, publicKey string, natsClient natsio.Server) (*Client, error) {
 	validENVs := []ENV{EnvProd, EnvDev, EnvStaging}
 	if !funk.Contains(validENVs, env) {
 		return nil, fmt.Errorf("globalcare.NewClient - invalid_env: %s", env)
@@ -43,11 +47,13 @@ func NewClient(env ENV, privateKey, publicKey string) (*Client, error) {
 	return &Client{
 		privateKey: privKey,
 		publicKey:  pubKey,
+		env:        env,
+		natsClient: natsClient,
 	}, nil
 }
 
 // CreateOrder ...
-func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
+func (c *Client) CreateOrder(p CreateOrderPayload) (*CreateOrderResponseDecoded, error) {
 	url := c.getBaseURL() + apiPathCreateOrder
 	data := createOrderData{
 		ProductCode: productCodeDefault,
@@ -58,9 +64,14 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 		InsuredInfo: p.InsuredInfo,
 	}
 
+	dataString := base64.Encode(pjson.ToBytes(data))
+	sign, err := c.signData(dataString)
+	if err != nil {
+		return nil, fmt.Errorf("globalcare.Client.CreateOrder - sign_err %v", err)
+	}
 	body := CommonRequestBody{
-		Signature: "", // TODO:implement
-		Data:      base64.Encode(pjson.ToBytes(data)),
+		Signature: sign,
+		Data:      dataString,
 	}
 	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
@@ -70,7 +81,7 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 			Data:   pjson.ToJSONString(body),
 		},
 	}
-	msg, err := c.requestNats(constant.NatsCommunicationSubjectRequestHTTP, natsPayload)
+	msg, err := c.requestNats(subject.Communication.RequestHTTP, natsPayload)
 	if err != nil {
 		logger.Error("globalcare.Client.CreateOrder", logger.LogData{
 			"err":     err.Error(),
@@ -85,12 +96,30 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return nil, err
 	}
-	err = r.ParseResponseData(&res)
-	return &res, err
+	if err = r.ParseResponseData(&res); err != nil {
+		return nil, err
+	}
+	if r.Response == nil {
+		return nil, fmt.Errorf("globalcare.Client.CreateOrder create_order_empty_response")
+	}
+
+	if r.Response.StatusCode >= http.StatusBadRequest {
+		info, err := res.DecodeError()
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(info.Message)
+	}
+	info, err := res.DecodeCreateOrderSuccess()
+	if err != nil {
+		return nil, err
+	}
+
+	return &info, err
 }
 
 // GetOrder ...
-func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
+func (c *Client) GetOrder(orderCode string) (*GetOrderResponseDecoded, error) {
 	url := c.getBaseURL() + fmt.Sprintf(apiPathGetOrder, orderCode)
 	natsPayload := model.CommunicationRequestHttp{
 		ResponseImmediately: true,
@@ -99,7 +128,7 @@ func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 			Method: http.MethodGet,
 		},
 	}
-	msg, err := c.requestNats(constant.NatsCommunicationSubjectRequestHTTP, natsPayload)
+	msg, err := c.requestNats(subject.Communication.RequestHTTP, natsPayload)
 	if err != nil {
 		logger.Error("globalcare.Client.GetOrder", logger.LogData{
 			"err":     err.Error(),
@@ -114,8 +143,25 @@ func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return nil, err
 	}
-	err = r.ParseResponseData(&res)
-	return &res, err
+	if err = r.ParseResponseData(&res); err != nil {
+		return nil, err
+	}
+	if r.Response == nil {
+		return nil, fmt.Errorf("globalcare.Client.GetOrder get_order_empty_response")
+	}
+
+	if r.Response.StatusCode >= http.StatusBadRequest {
+		info, err := res.DecodeError()
+		if err != nil {
+			return nil, err
+		}
+		return nil, errors.New(info.Message)
+	}
+	info, err := res.DecodeGetOrderSuccess()
+	if err != nil {
+		return nil, err
+	}
+	return &info, err
 }
 
 func (c *Client) requestNats(subject string, data interface{}) (*nats.Msg, error) {
@@ -125,4 +171,19 @@ func (c *Client) requestNats(subject string, data interface{}) (*nats.Msg, error
 
 func (c *Client) getBaseURL() string {
 	return baseURLENVMapping[c.env]
+}
+
+func (c *Client) signData(s string) (string, error) {
+	msgHash := sha256.New()
+	_, err := msgHash.Write([]byte(s))
+	if err != nil {
+		return "", err
+	}
+	msgHashSum := msgHash.Sum(nil)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, c.privateKey, crypto.SHA256, msgHashSum)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.Encode(signature), nil
 }
