@@ -8,10 +8,10 @@ import (
 	"github.com/Selly-Modules/logger"
 	"github.com/Selly-Modules/natsio"
 	"github.com/Selly-Modules/natsio/model"
+	"github.com/Selly-Modules/natsio/subject"
 	"github.com/nats-io/nats.go"
 	"github.com/thoas/go-funk"
 
-	"github.com/Selly-Modules/3pl/constant"
 	"github.com/Selly-Modules/3pl/util/base64"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
@@ -70,7 +70,7 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CommonResponse, error) {
 			Data:   pjson.ToJSONString(body),
 		},
 	}
-	msg, err := c.requestNats(constant.NatsCommunicationSubjectRequestHTTP, natsPayload)
+	msg, err := c.requestNats(subject.Communication.RequestHTTP, natsPayload)
 	if err != nil {
 		logger.Error("globalcare.Client.CreateOrder", logger.LogData{
 			"err":     err.Error(),
@@ -99,7 +99,7 @@ func (c *Client) GetOrder(orderCode string) (*CommonResponse, error) {
 			Method: http.MethodGet,
 		},
 	}
-	msg, err := c.requestNats(constant.NatsCommunicationSubjectRequestHTTP, natsPayload)
+	msg, err := c.requestNats(subject.Communication.RequestHTTP, natsPayload)
 	if err != nil {
 		logger.Error("globalcare.Client.GetOrder", logger.LogData{
 			"err":     err.Error(),

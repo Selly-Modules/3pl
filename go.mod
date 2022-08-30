@@ -4,7 +4,9 @@ go 1.17
 
 require (
 	github.com/Selly-Modules/logger v0.0.1
-	github.com/Selly-Modules/natsio v1.0.1-0.20220818104747-572120c26a1d
+	github.com/Selly-Modules/natsio v1.0.1
+	github.com/nats-io/nats.go v1.13.0
+	github.com/thoas/go-funk v0.9.1
 )
 
 require (
@@ -14,14 +16,11 @@ require (
 	github.com/elastic/go-windows v1.0.0 // indirect
 	github.com/jcchavezs/porto v0.1.0 // indirect
 	github.com/joeshaw/multierror v0.0.0-20140124173710-69b34d4ec901 // indirect
-	github.com/logrusorgru/aurora v2.0.3+incompatible // indirect
-	github.com/nats-io/nats.go v1.13.0 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/prometheus/procfs v0.0.0-20190425082905-87a4384529e0 // indirect
 	github.com/santhosh-tekuri/jsonschema v1.2.4 // indirect
-	github.com/thoas/go-funk v0.9.1 // indirect
 	go.elastic.co/apm v1.13.1 // indirect
 	go.elastic.co/apm/module/apmzap v1.13.1 // indirect
 	go.elastic.co/fastjson v1.1.0 // indirect
