@@ -79,6 +79,9 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CreateOrderResponseDecoded,
 			URL:    url,
 			Method: http.MethodPost,
 			Data:   pjson.ToJSONString(body),
+			Header: map[string]string{
+				"Content-Type": "application/json",
+			},
 		},
 	}
 	msg, err := c.requestNats(subject.Communication.RequestHTTP, natsPayload)
