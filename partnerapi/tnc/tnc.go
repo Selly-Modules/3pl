@@ -66,7 +66,7 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 	}
 	var (
 		r       model.CommunicationHttpResponse
-		errRes  ErrRes
+		errRes  Error
 		dataRes []OutboundRequestRes
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
@@ -80,7 +80,7 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 		if err = r.ParseResponseData(&errRes); err != nil {
 			return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: parse_response_err: %v", err)
 		}
-		return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+		return nil, errRes
 	}
 	if err = r.ParseResponseData(&dataRes); err != nil {
 		return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: parse_response_data: %v", err)
@@ -91,7 +91,7 @@ func (c *Client) CreateOutboundRequest(p OutboundRequestPayload) (*OutboundReque
 	item := &dataRes[0]
 	e := item.Error
 	if e != nil {
-		return nil, fmt.Errorf("tnc.Client.CreateOutboundRequest: failed, code %s - message %s", e.Code, e.ErrorMessage)
+		return nil, errRes
 	}
 
 	return item, err
@@ -119,7 +119,7 @@ func (c *Client) UpdateOutboundRequestLogisticInfo(p UpdateORLogisticInfoPayload
 	}
 	var (
 		r      model.CommunicationHttpResponse
-		errRes ErrRes
+		errRes Error
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: parse_data %v", err)
@@ -132,7 +132,7 @@ func (c *Client) UpdateOutboundRequestLogisticInfo(p UpdateORLogisticInfoPayload
 		if err = r.ParseResponseData(&errRes); err != nil {
 			return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: parse_response_err: %v", err)
 		}
-		return fmt.Errorf("tnc.Client.UpdateOutboundRequestLogisticInfo: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+		return errRes
 	}
 	return nil
 }
@@ -158,7 +158,7 @@ func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, er
 	}
 	var (
 		r               model.CommunicationHttpResponse
-		errRes          ErrRes
+		errRes          Error
 		outboundRequest OutboundRequestInfo
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
@@ -172,7 +172,7 @@ func (c *Client) GetOutboundRequestByID(requestID int) (*OutboundRequestInfo, er
 		if err = r.ParseResponseData(&errRes); err != nil {
 			return nil, fmt.Errorf("tnc.Client.GetOutboundRequestByID: parse_response_err: %v", err)
 		}
-		return nil, fmt.Errorf("tnc.Client.GetOutboundRequestByID: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+		return nil, errRes
 	}
 	if err = r.ParseResponseData(&outboundRequest); err != nil {
 		return nil, fmt.Errorf("tnc.Client.GetOutboundRequestByID: parse_response_data: %v", err)
@@ -203,7 +203,7 @@ func (c *Client) CancelOutboundRequest(requestID int, note string) error {
 	}
 	var (
 		r      model.CommunicationHttpResponse
-		errRes ErrRes
+		errRes Error
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
 		return fmt.Errorf("tnc.Client.CancelOutboundRequest: parse_data %v", err)
@@ -216,7 +216,7 @@ func (c *Client) CancelOutboundRequest(requestID int, note string) error {
 		if err = r.ParseResponseData(&errRes); err != nil {
 			return fmt.Errorf("tnc.Client.CancelOutboundRequest: parse_response_err: %v", err)
 		}
-		return fmt.Errorf("tnc.Client.CancelOutboundRequest: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+		return errRes
 	}
 	return nil
 }
@@ -252,7 +252,7 @@ func (c *Client) auth() (*authRes, error) {
 	}
 	var (
 		r      model.CommunicationHttpResponse
-		errRes ErrRes
+		errRes Error
 		data   authRes
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
@@ -266,7 +266,7 @@ func (c *Client) auth() (*authRes, error) {
 		if err = r.ParseResponseData(&errRes); err != nil {
 			return nil, fmt.Errorf("tnc.Client.auth: parse_response_err: %v", err)
 		}
-		return nil, fmt.Errorf("tnc.Client.auth: failed code %s, message %s", errRes.Code, errRes.ErrorMessage)
+		return nil, errRes
 	}
 	if err = r.ParseResponseData(&data); err != nil {
 		return nil, fmt.Errorf("tnc.Client.auth: parse_response_data: %v", err)
@@ -288,9 +288,8 @@ func (c *Client) getRequestHeader() map[string]string {
 }
 
 func (c *Client) requestHttpViaNats(data model.CommunicationRequestHttp) (*nats.Msg, error) {
-	s := subject.Communication.RequestHTTP
 	b := pjson.ToBytes(data)
-	return c.natsClient.Request(s, b)
+	return c.natsClient.Request(subject.Communication.RequestHTTP, b)
 }
 
 func (c *Client) getBaseURL() string {
