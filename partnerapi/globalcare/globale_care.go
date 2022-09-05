@@ -7,6 +7,7 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/Selly-Modules/logger"
@@ -97,24 +98,30 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CreateOrderResponseDecoded,
 		res CommonResponse
 	)
 	if err = pjson.Unmarshal(msg.Data, &r); err != nil {
+		log.Printf("globalcare.Client.CreateOrder - pjson.Unmarshal %v, %s\n", err, string(msg.Data))
 		return nil, err
 	}
 	if err = r.ParseResponseData(&res); err != nil {
+		log.Printf("globalcare.Client.CreateOrder - ParseResponseData %v, %s\n", err, string(msg.Data))
 		return nil, err
 	}
 	if r.Response == nil {
+		log.Println("globalcare.Client.CreateOrder - nil response")
 		return nil, fmt.Errorf("globalcare.Client.CreateOrder create_order_empty_response")
 	}
 
 	if r.Response.StatusCode >= http.StatusBadRequest {
+		log.Println("globalcare.Client.CreateOrder - bad request", res)
 		info, err := res.DecodeError()
 		if err != nil {
+			log.Println("globalcare.Client.CreateOrder - decode err", err)
 			return nil, err
 		}
 		return nil, errors.New(info.Message)
 	}
 	info, err := res.DecodeCreateOrderSuccess()
 	if err != nil {
+		log.Println("globalcare.Client.CreateOrder - DecodeCreateOrderSuccess err:", err)
 		return nil, err
 	}
 
