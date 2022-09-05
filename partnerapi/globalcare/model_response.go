@@ -1,6 +1,10 @@
 package globalcare
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	"github.com/Selly-Modules/3pl/util/base64"
+)
 
 // CommonResponse ...
 type CommonResponse struct {
@@ -28,7 +32,8 @@ func (r *CommonResponse) DecodeError() (res ResponseError, err error) {
 
 // Decode ...
 func (r *CommonResponse) Decode(resultPointer interface{}) error {
-	return json.Unmarshal([]byte(r.Data), resultPointer)
+	b := base64.Decode(r.Data)
+	return json.Unmarshal(b, resultPointer)
 }
 
 // CreateOrderResponseDecoded ...
