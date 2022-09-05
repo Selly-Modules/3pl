@@ -10,19 +10,19 @@ type CommonResponse struct {
 
 // DecodeCreateOrderSuccess ...
 func (r *CommonResponse) DecodeCreateOrderSuccess() (res CreateOrderResponseDecoded, err error) {
-	err = r.Decode(res)
+	err = r.Decode(&res)
 	return res, err
 }
 
 // DecodeGetOrderSuccess ...
 func (r *CommonResponse) DecodeGetOrderSuccess() (res GetOrderResponseDecoded, err error) {
-	err = r.Decode(res)
+	err = r.Decode(&res)
 	return res, err
 }
 
 // DecodeError ...
 func (r *CommonResponse) DecodeError() (res ResponseError, err error) {
-	err = r.Decode(res)
+	err = r.Decode(&res)
 	return res, err
 }
 

@@ -121,7 +121,7 @@ func (c *Client) CreateOrder(p CreateOrderPayload) (*CreateOrderResponseDecoded,
 	}
 	info, err := res.DecodeCreateOrderSuccess()
 	if err != nil {
-		log.Println("globalcare.Client.CreateOrder - DecodeCreateOrderSuccess err:", err)
+		log.Println("globalcare.Client.CreateOrder - DecodeCreateOrderSuccess err:", err, string(msg.Data))
 		return nil, err
 	}
 
