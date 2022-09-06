@@ -50,4 +50,5 @@ type Webhook struct {
 	OrderCode string    `json:"orderCode"`
 	UpdatedAt time.Time `json:"updatedAt"`
 	Note      string    `json:"note"`
+	CertLink  string    `json:"certLink"`
 }
