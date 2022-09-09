@@ -46,9 +46,10 @@ type InsuredInfo struct {
 
 // Webhook ...
 type Webhook struct {
-	Status    int       `json:"status"`
-	OrderCode string    `json:"orderCode"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Note      string    `json:"note"`
-	CertLink  string    `json:"certLink"`
+	Status           int       `json:"status"`
+	OrderCode        string    `json:"orderCode"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+	Note             string    `json:"note"`
+	CertLink         string    `json:"certLink"`
+	PartnerOrderCode string    `json:"partnerOrderCode"`
 }
