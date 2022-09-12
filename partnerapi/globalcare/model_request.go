@@ -1,5 +1,7 @@
 package globalcare
 
+import "time"
+
 // CommonRequestBody ...
 type CommonRequestBody struct {
 	Signature string `json:"signature"`
@@ -40,4 +42,14 @@ type InsuredInfo struct {
 	BuyerAddress     string `json:"buyerAddress"`
 	YearsOfInsurance string `json:"yearsOfInsurance"`
 	BeginDate        string `json:"beginDate"`
+}
+
+// Webhook ...
+type Webhook struct {
+	Status           int       `json:"status"`
+	OrderCode        string    `json:"orderCode"`
+	UpdatedAt        time.Time `json:"updatedAt"`
+	Note             string    `json:"note"`
+	CertLink         string    `json:"certLink"`
+	PartnerOrderCode string    `json:"partnerOrderCode"`
 }

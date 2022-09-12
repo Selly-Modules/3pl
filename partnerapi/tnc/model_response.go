@@ -2,16 +2,10 @@ package tnc
 
 // OutboundRequestRes ...
 type OutboundRequestRes struct {
-	OrID          int     `json:"orId"`
-	OrCode        string  `json:"orCode"`
-	PartnerORCode string  `json:"partnerORCode"`
-	Error         *ErrRes `json:"error"`
-}
-
-// ErrRes ...
-type ErrRes struct {
-	Code         string `json:"code"`
-	ErrorMessage string `json:"errorMessage"`
+	OrID          int    `json:"orId"`
+	OrCode        string `json:"orCode"`
+	PartnerORCode string `json:"partnerORCode"`
+	Error         *Error `json:"error"`
 }
 
 type authRes struct {
