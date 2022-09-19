@@ -11,6 +11,9 @@ const (
 	headerXAPIKey    = "x-api-key"
 	headerXTimestamp = "x-timestamp"
 	headerXSignature = "x-signature"
+
+	webhookEventUpdateOrderStatus = "update_order_status"
+	webhookEventUpdateInventory   = "update_inventory"
 )
 
 var (

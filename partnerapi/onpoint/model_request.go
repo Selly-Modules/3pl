@@ -1,6 +1,10 @@
 package onpoint
 
-import "time"
+import (
+	"time"
+
+	"github.com/Selly-Modules/3pl/util/pjson"
+)
 
 /*
  * Request payload
@@ -55,13 +59,6 @@ type CancelOrderRequest struct {
  * WEBHOOK ONPOINT
  */
 
-// WebhookPayload ...
-type WebhookPayload struct {
-	Event       string      `json:"event"`
-	RequestedAt time.Time   `json:"requested_at"`
-	Data        interface{} `json:"data"`
-}
-
 // WebhookDataUpdateInventory ...
 type WebhookDataUpdateInventory struct {
 	Sku               string    `json:"sku"`
@@ -80,4 +77,41 @@ type WebhookDataUpdateOrderStatus struct {
 	Status           string    `json:"status"`
 	DeliveryStatus   string    `json:"delivery_status"`
 	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+// WebhookPayload ...
+type WebhookPayload struct {
+	Event       string      `json:"event"`
+	RequestedAt time.Time   `json:"requested_at"`
+	Data        interface{} `json:"data"`
+}
+
+// GetDataEventUpdateOrderStatus ...
+func (p WebhookPayload) GetDataEventUpdateOrderStatus() (data *WebhookDataUpdateOrderStatus, ok bool) {
+	if p.Event != webhookEventUpdateOrderStatus {
+		return nil, false
+	}
+	b, err := pjson.Marshal(p.Data)
+	if err != nil {
+		return nil, false
+	}
+	if err = pjson.Unmarshal(b, &data); err != nil {
+		return nil, false
+	}
+	return data, true
+}
+
+// GetDataEventUpdateInventory ...
+func (p WebhookPayload) GetDataEventUpdateInventory() (data *WebhookDataUpdateInventory, ok bool) {
+	if p.Event != webhookEventUpdateInventory {
+		return nil, false
+	}
+	b, err := pjson.Marshal(p.Data)
+	if err != nil {
+		return nil, false
+	}
+	if err = pjson.Unmarshal(b, &data); err != nil {
+		return nil, false
+	}
+	return data, true
 }
