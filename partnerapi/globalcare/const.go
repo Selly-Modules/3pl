@@ -20,19 +20,33 @@ const (
 )
 
 const (
-	VehicleTypeID50ccAbove    = 1
-	VehicleTypeID50ccBelow    = 2
-	VehicleTypeIDElectricBike = 3
+	MotorbikeProductCode = "bbxm"
+	MotorbikeProviderID  = 4
+	MotorbikeProductID   = 18
+
+	CarProductCode = "bbot"
+	CarProviderID  = 10
+	CarProductID   = 35
+
+	NumOfSeatsMinValue = 25
 )
 
-const (
-	CarOccupantAccidentInsurance0   = 1
-	CarOccupantAccidentInsurance10m = 2
-	CarOccupantAccidentInsurance20m = 3
-)
+type InsuranceConfig struct {
+	ProductCode string
+	ProviderID  int
+	ProductID   int
+}
 
-const (
-	productCodeDefault = "bbxm"
-	providerIDDefault  = 4
-	productIDDefault   = 18
+var (
+	CarConfig = InsuranceConfig{
+		ProductCode: CarProductCode,
+		ProviderID:  CarProviderID,
+		ProductID:   CarProductID,
+	}
+
+	MotorbikeConfig = InsuranceConfig{
+		ProductCode: MotorbikeProductCode,
+		ProviderID:  MotorbikeProviderID,
+		ProductID:   MotorbikeProductID,
+	}
 )

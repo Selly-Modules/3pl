@@ -54,17 +54,8 @@ func NewClient(env ENV, privateKey, publicKey string, natsClient natsio.Server) 
 }
 
 // CreateOrder ...
-func (c *Client) CreateOrder(p CreateOrderPayload) (*CreateOrderResponseDecoded, error) {
+func (c *Client) CreateOrder(data CreateOrderPayload) (*CreateOrderResponseDecoded, error) {
 	url := c.getBaseURL() + apiPathCreateOrder
-	data := createOrderData{
-		ProductCode: productCodeDefault,
-		ProviderID:  providerIDDefault,
-		ProductID:   productIDDefault,
-		PartnerID:   p.PartnerOrderCode,
-		VehicleInfo: p.VehicleInfo,
-		InsuredInfo: p.InsuredInfo,
-	}
-
 	dataString := base64.Encode(pjson.ToBytes(data))
 	sign, err := c.signData(dataString)
 	if err != nil {
