@@ -77,9 +77,8 @@ type GetOrderResult struct {
 
 // InsuranceInfo ...
 type InsuranceInfo struct {
-	TypeId                       int    `json:"typeId"`
-	TypeName                     string `json:"typeName"`
-	CarOccupantAccidentInsurance int    `json:"carOccupantAccidentInsurance"`
+	TypeId   int    `json:"typeId"`
+	TypeName string `json:"typeName"`
 }
 
 // BuyerInfo ...
