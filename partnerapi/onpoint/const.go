@@ -4,8 +4,8 @@ const (
 	baseURLStaging = "https://dev-selly-api.onpoint.vn"
 	baseURLProd    = "https://selly-api.onpoint.vn"
 
-	apiPathCreateOrder    = "/v1/orders"
-	apiPathUpdateDelivery = "/v1/orders/delivery/update"
+	apiPathCreateOrder    = "/v1/orders/create"
+	apiPathUpdateDelivery = "/v1/orders/update_delivery"
 	apiPathCancelOrder    = "/v1/orders/cancel"
 	apiPathGetChannels    = "/v1/channels"
 
