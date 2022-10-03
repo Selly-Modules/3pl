@@ -1,7 +1,8 @@
 package onpoint
 
 const (
-	baseURLStaging = "https://dev-api.onpoint.vn"
+	baseURLStaging = "https://dev-selly-api.onpoint.vn"
+	baseURLProd    = "https://selly-api.onpoint.vn"
 
 	apiPathCreateOrder    = "/v1/orders"
 	apiPathUpdateDelivery = "/v1/orders/delivery/update"
@@ -18,7 +19,7 @@ const (
 
 var (
 	baseURLENVMapping = map[ENV]string{
-		// EnvProd:    baseURLProd,
+		EnvProd:    baseURLProd,
 		EnvStaging: baseURLStaging,
 	}
 )
