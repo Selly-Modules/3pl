@@ -1,6 +1,9 @@
 package globalcare
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 // CommonRequestBody ...
 type CommonRequestBody struct {
@@ -10,12 +13,6 @@ type CommonRequestBody struct {
 
 // CreateOrderPayload ...
 type CreateOrderPayload struct {
-	PartnerOrderCode string      `json:"partnerOrderCode"`
-	VehicleInfo      VehicleInfo `json:"vehicleInfo"`
-	InsuredInfo      InsuredInfo `json:"insuredInfo"`
-}
-
-type createOrderData struct {
 	ProductCode string      `json:"productCode"`
 	ProviderID  int         `json:"providerId"`
 	ProductID   int         `json:"productId"`
@@ -26,12 +23,38 @@ type createOrderData struct {
 
 // VehicleInfo ...
 type VehicleInfo struct {
-	TypeID                       int    `json:"typeId"`
-	TypeName                     string `json:"typeName"`
-	CarOccupantAccidentInsurance int    `json:"carOccupantAccidentInsurance"`
-	License                      string `json:"license"`
-	Chassis                      string `json:"chassis"`
-	Engine                       string `json:"engine"`
+	TypeID   int    `json:"typeId"`
+	TypeName string `json:"typeName"`
+	License  string `json:"license"`
+	Chassis  string `json:"chassis"`
+	Engine   string `json:"engine"`
+
+	// V2 = true if TypeID = 1 and insurance type is car
+	V2 bool `json:"v2,omitempty"`
+	// CarOccupantAccidentInsurance type int for motorbike, type CarOccupantAccidentInsuranceObj for car insurance
+	CarOccupantAccidentInsurance interface{} `json:"carOccupantAccidentInsurance"`
+	NumberOfSeatsOver25          int         `json:"numberOfSeatsOver25"`
+	NumberOfSeatsOrTonnageName   string      `json:"numberOfSeatsOrTonnageName"`
+	NumberOfSeatsOrTonnage       int         `json:"numberOfSeatsOrTonnage"`
+}
+
+// CarOccupantAccidentInsuranceObj ...
+type CarOccupantAccidentInsuranceObj struct {
+	NumberOfSeats int `json:"numberOfSeats"`
+}
+
+func (c *CarOccupantAccidentInsuranceObj) MarshalJSON() ([]byte, error) {
+	buy := 1
+	if c.NumberOfSeats <= 0 {
+		buy = 2
+	}
+	return json.Marshal(&struct {
+		Buy           int `json:"buy"`
+		NumberOfSeats int `json:"numberOfSeats"`
+	}{
+		Buy:           buy,
+		NumberOfSeats: c.NumberOfSeats,
+	})
 }
 
 // InsuredInfo ...
