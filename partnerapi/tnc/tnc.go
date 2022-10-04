@@ -12,6 +12,7 @@ import (
 	"github.com/Selly-Modules/natsio/subject"
 	"github.com/nats-io/nats.go"
 
+	"github.com/Selly-Modules/3pl/util/httputil"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
@@ -230,7 +231,7 @@ func (c *Client) auth() (*authRes, error) {
 
 	body := v.Encode()
 	header := map[string]string{
-		"Content-Type": "application/x-www-form-urlencoded",
+		httputil.HeaderKeyContentType: httputil.HeaderValueApplicationURLEncoded,
 	}
 	apiURL := baseURLAuthENVMapping[c.env] + fmt.Sprintf(apiPathAuth, c.realm)
 	natsPayload := model.CommunicationRequestHttp{
@@ -276,7 +277,7 @@ func (c *Client) auth() (*authRes, error) {
 
 func (c *Client) getRequestHeader() map[string]string {
 	m := map[string]string{
-		"Content-Type": "application/json",
+		httputil.HeaderKeyContentType: httputil.HeaderValueApplicationJSON,
 	}
 	token, err := c.getToken()
 	if err != nil {

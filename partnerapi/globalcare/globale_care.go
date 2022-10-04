@@ -18,6 +18,7 @@ import (
 	"github.com/thoas/go-funk"
 
 	"github.com/Selly-Modules/3pl/util/base64"
+	"github.com/Selly-Modules/3pl/util/httputil"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
@@ -72,7 +73,7 @@ func (c *Client) CreateOrder(data CreateOrderPayload) (*CreateOrderResponseDecod
 			Method: http.MethodPost,
 			Data:   pjson.ToJSONString(body),
 			Header: map[string]string{
-				"Content-Type": "application/json",
+				httputil.HeaderKeyContentType: httputil.HeaderValueApplicationJSON,
 			},
 		},
 	}

@@ -12,6 +12,7 @@ import (
 	"github.com/Selly-Modules/natsio/model"
 	"github.com/Selly-Modules/natsio/subject"
 
+	"github.com/Selly-Modules/3pl/util/httputil"
 	"github.com/Selly-Modules/3pl/util/pjson"
 )
 
@@ -171,9 +172,10 @@ func (c *Client) requestHttpViaNats(data model.CommunicationRequestHttp, res int
 	// sign data
 	sign := hashSHA256AndUppercase(s, c.secretKey)
 	data.Payload.Header = map[string]string{
-		headerXAPIKey:    c.apiKey,
-		headerXSignature: sign,
-		headerXTimestamp: ts,
+		headerXAPIKey:                 c.apiKey,
+		headerXSignature:              sign,
+		headerXTimestamp:              ts,
+		httputil.HeaderKeyContentType: httputil.HeaderValueApplicationJSON,
 	}
 
 	return ec.Request(subject.Communication.RequestHTTP, data, res)
