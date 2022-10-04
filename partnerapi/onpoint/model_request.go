@@ -12,39 +12,31 @@ import (
 
 // CreateOrderRequest ...
 type CreateOrderRequest struct {
-	PartnerOrderCode string      `json:"partner_order_code"`
-	OrderDate        time.Time   `json:"order_date"`
-	ChannelCode      string      `json:"channel_code"`
-	FullName         string      `json:"full_name"`
-	Email            string      `json:"email"`
-	Phone            string      `json:"phone"`
-	Address          string      `json:"address"`
-	DistrictCode     string      `json:"district_code"`
-	WardCode         string      `json:"ward_code"`
-	ProvinceCode     string      `json:"province_code"`
-	Note             string      `json:"note"`
-	SubtotalPrice    int         `json:"subtotal_price"`
-	ShippingFee      int         `json:"shipping_fee"`
-	TotalDiscounts   int         `json:"total_discounts"`
-	TotalPrice       int         `json:"total_price"`
-	PaymentMethod    string      `json:"payment_method"`
-	DeliveryPlatform string      `json:"delivery_platform"`
-	Items            []OrderItem `json:"items"`
+	OrderCode          string      `json:"order_code"`
+	OrderDate          time.Time   `json:"order_date"`
+	PickupLocationCode string      `json:"pickup_location_code"`
+	Note               string      `json:"note"`
+	SubtotalPrice      int         `json:"subtotal_price"`
+	TotalDiscounts     int         `json:"total_discounts"`
+	TotalPrice         int         `json:"total_price"`
+	PaymentMethod      string      `json:"payment_method"`
+	Items              []OrderItem `json:"items"`
 }
 
 // OrderItem ...
 type OrderItem struct {
-	SellingPrice int    `json:"selling_price"`
-	Quantity     int    `json:"quantity"`
-	Uom          string `json:"uom"`
-	Amount       int    `json:"amount"`
-	Name         string `json:"name"`
-	PartnerSku   string `json:"partner_sku"`
+	SellingPrice  int    `json:"selling_price"`
+	Quantity      int    `json:"quantity"`
+	Uom           string `json:"uom"`
+	Amount        int    `json:"amount"`
+	Name          string `json:"name"`
+	PartnerSku    string `json:"sku"`
+	DiscountPrice int    `json:"discount_price"`
 }
 
 // UpdateOrderDeliveryRequest ...
 type UpdateOrderDeliveryRequest struct {
-	OrderNo                string `json:"order_no"`          // required
+	OrderCode              string `json:"order_code"`        // required
 	DeliveryPlatform       string `json:"delivery_platform"` // required
 	DeliveryTrackingNumber string `json:"delivery_tracking_number"`
 	ShippingLabel          string `json:"shipping_label"`
@@ -52,7 +44,7 @@ type UpdateOrderDeliveryRequest struct {
 
 // CancelOrderRequest ...
 type CancelOrderRequest struct {
-	OrderNo string `json:"order_no"`
+	OrderNo string `json:"order_code"`
 }
 
 /**

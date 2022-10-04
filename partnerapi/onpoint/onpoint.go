@@ -51,6 +51,7 @@ func (c *Client) CreateOrder(p CreateOrderRequest) (*CreateOrderResponse, error)
 		r       model.CommunicationHttpResponse
 		errRes  Error
 		dataRes struct {
+			Code string              `json:"code"`
 			Data CreateOrderResponse `json:"data"`
 		}
 	)
@@ -148,43 +149,6 @@ func (c *Client) CancelOrder(p CancelOrderRequest) (*CancelOrderResponse, error)
 	}
 
 	return &dataRes.Data, nil
-}
-
-// GetChannels ...
-func (c *Client) GetChannels() ([]ChannelResponse, error) {
-	url := c.getBaseURL() + apiPathGetChannels
-	natsPayload := model.CommunicationRequestHttp{
-		ResponseImmediately: true,
-		Payload: model.HttpRequest{
-			URL:    url,
-			Method: http.MethodGet,
-		},
-	}
-	var (
-		r       model.CommunicationHttpResponse
-		errRes  Error
-		dataRes struct {
-			Data []ChannelResponse `json:"data"`
-		}
-	)
-	if err := c.requestHttpViaNats(natsPayload, &r); err != nil {
-		return nil, err
-	}
-	res := r.Response
-	if res == nil {
-		return nil, fmt.Errorf("onpoint.Client.GetChannels: empty_response")
-	}
-	if res.StatusCode >= http.StatusBadRequest {
-		if err := r.ParseResponseData(&errRes); err != nil {
-			return nil, fmt.Errorf("onpoint.Client.GetChannels: parse_response_err: %v", err)
-		}
-		return nil, errRes
-	}
-	if err := r.ParseResponseData(&dataRes); err != nil {
-		return nil, fmt.Errorf("onpoint.Client.GetChannels: parse_response_data: %v", err)
-	}
-
-	return dataRes.Data, nil
 }
 
 func (c *Client) requestHttpViaNats(data model.CommunicationRequestHttp, res interface{}) error {
