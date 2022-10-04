@@ -15,6 +15,8 @@ const (
 
 	webhookEventUpdateOrderStatus = "update_order_status"
 	webhookEventUpdateInventory   = "update_inventory"
+
+	CodeSuccess = "SUCCESS"
 )
 
 var (
